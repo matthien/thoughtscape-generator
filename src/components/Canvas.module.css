@@ -31,29 +31,53 @@
   transition: opacity 300ms ease;
 }
 
-.title {
-  position: absolute;
-  transform: translate(-50%, -50%);
+/* Corner panel (design system: Panel). Fixed to the viewport, above the
+   world (whose transform keeps even hovered cards' z-index inside it) and
+   the ruler, so cards pan underneath and show through blurred. */
+.panel {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 20;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 296px;
-  text-align: center;
-  font-size: 14px;
-  letter-spacing: -0.28px;
-  pointer-events: none;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(25, 25, 27, 0.4);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(150, 152, 158, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  cursor: default;
   transition: opacity 300ms ease;
 }
 
-.titleMain {
-  font-weight: 600;
+.panelTitle {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.28px;
   color: #ffffff;
 }
 
-.titleSub {
-  font-weight: 400;
-  color: #a5a5a5;
+/* Same look as .resetButton. */
+.panelButton {
+  background: #2d2d2d;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: -0.24px;
+  cursor: pointer;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  transition: background 120ms ease;
+}
+
+.panelButton:hover {
+  background: #4d4d4d;
 }
 
 .resetButton {

@@ -12,7 +12,7 @@ import {
   detailPath,
   posterHeightFor,
 } from "@/lib/detailLayout";
-import { TITLE_POS, GRID_TILE_URL, centerPan } from "@/lib/mat";
+import { GRID_TILE_URL, centerPan } from "@/lib/mat";
 import Card from "./Card";
 import DetailsView from "./DetailsView";
 import Ruler from "./Ruler";
@@ -36,12 +36,13 @@ function prefersReducedMotion(): boolean {
 export default function Canvas({
   entries,
   title,
-  subtitle,
+  changeUsernameAction,
 }: {
   entries: MediaEntry[];
-  /** Copy printed at the center of the mat; the generator fills it in per visitor. */
+  /** Copy shown in the corner panel; the generator fills it in per visitor. */
   title: string;
-  subtitle: string;
+  /** Server action behind the panel's "change username" button. */
+  changeUsernameAction: () => Promise<void>;
 }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -496,18 +497,6 @@ export default function Canvas({
           }}
         />
 
-        <div
-          className={styles.title}
-          style={{
-            left: TITLE_POS.x,
-            top: TITLE_POS.y,
-            opacity: phase === "details" ? 0.08 : 1,
-          }}
-        >
-          <div className={styles.titleMain}>{title}</div>
-          <div className={styles.titleSub}>{subtitle}</div>
-        </div>
-
         {entries.map((entry, i) => {
           const isSelected = i === selectedIndex;
           // In the details view, other cards peeking in from the edges stay
@@ -536,6 +525,24 @@ export default function Canvas({
             />
           );
         })}
+      </div>
+
+      {/* Screen space, outside .world, so it stays in the corner while the
+          mat pans and zooms underneath. Fades out with the grid in the
+          details view; inert then so its button can't be tabbed to. */}
+      <div
+        className={styles.panel}
+        style={{ opacity: phase === "details" ? 0 : 1 }}
+        inert={phase === "details"}
+        // Swallowed so pressing anywhere on the panel doesn't start a mat pan.
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <h1 className={styles.panelTitle}>{title}</h1>
+        <form action={changeUsernameAction}>
+          <button type="submit" className={styles.panelButton}>
+            change username
+          </button>
+        </form>
       </div>
 
       {phase === "idle" && (

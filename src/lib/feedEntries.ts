@@ -55,8 +55,12 @@ export async function getFeedEntries({
     letterboxd ? fetchLetterboxdEntries(letterboxd) : Promise.resolve([]),
     goodreads ? fetchGoodreadsEntries(goodreads) : Promise.resolve([]),
   ]);
-  if (movies.status === "rejected" && books.status === "rejected") {
-    throw movies.reason;
+  // Throw only when every feed that was asked for failed; a feed that wasn't
+  // asked for "succeeds" with nothing, so it can't count as the survivor.
+  const lbFailed = movies.status === "rejected";
+  const grFailed = books.status === "rejected";
+  if ((lbFailed || !letterboxd) && (grFailed || !goodreads)) {
+    throw lbFailed ? movies.reason : grFailed ? books.reason : new Error("No feed requested");
   }
 
   // Positions are filled in by autoLayout() once everything is collected.

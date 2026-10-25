@@ -46,6 +46,9 @@ export async function fetchDirector(externalUrl: string): Promise<string | null>
   const filmUrl = externalUrl
     .replace(/letterboxd\.com\/[^/]+\/film\//, "letterboxd.com/film/")
     .replace(/\/\d+\/$/, "/");
+  // The URL comes from the feed, so it's only ever fetched if it really is a
+  // Letterboxd page: the server never requests anywhere else on its say-so.
+  if (!filmUrl.startsWith("https://letterboxd.com/film/")) return null;
   const res = await fetch(filmUrl, {
     headers: { "User-Agent": "Mozilla/5.0 (thoughtscape sync)" },
     cache: "no-store",

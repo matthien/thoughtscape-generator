@@ -9,6 +9,8 @@ export const USERNAME_COOKIES = {
 // someone who stops is forgotten a month later.
 export const USERNAME_COOKIE_OPTIONS = {
   httpOnly: true,
+  // HTTPS only once deployed; local dev runs on plain http://localhost.
+  secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
   path: "/",
   maxAge: 60 * 60 * 24 * 30,

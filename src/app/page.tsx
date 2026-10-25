@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { clearUsernames } from "@/app/actions";
+import { clearUsernames, createShareLink } from "@/app/actions";
 import Canvas from "@/components/Canvas";
 import UsernameForm from "@/components/UsernameForm";
 import { getFeedEntries } from "@/lib/feedEntries";
@@ -36,6 +36,7 @@ export default async function Home() {
       entries={entries}
       title={`${letterboxd}'s thoughtscape`}
       changeUsernameAction={clearUsernames}
+      shareAction={createShareLink}
     />
   );
 }

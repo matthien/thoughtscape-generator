@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { MediaEntry } from "@/lib/types";
 import {
@@ -16,6 +17,7 @@ import { GRID_TILE_URL, centerPan } from "@/lib/mat";
 import Card from "./Card";
 import DetailsView from "./DetailsView";
 import Ruler from "./Ruler";
+import ShareButton from "./ShareButton";
 import styles from "./Canvas.module.css";
 
 const OPEN_CLOSE_DURATION = 700;
@@ -37,12 +39,24 @@ export default function Canvas({
   entries,
   title,
   changeUsernameAction,
+  shareAction,
+  basePath = "",
 }: {
   entries: MediaEntry[];
   /** Copy shown in the corner panel; the generator fills it in per visitor. */
   title: string;
-  /** Server action behind the panel's "change username" button. */
-  changeUsernameAction: () => Promise<void>;
+  /**
+   * Server action behind the panel's "change username" button. Left out on
+   * a shared link, where the panel offers "make your own" instead.
+   */
+  changeUsernameAction?: () => Promise<void>;
+  /** Server action behind the panel's share (link icon) button. */
+  shareAction?: () => Promise<{ path: string; days: number }>;
+  /**
+   * Path the canvas lives under: "" for your own, "/s/<token>" for a shared
+   * link. Detail URLs become <basePath>/film/<slug> so a refresh stays on it.
+   */
+  basePath?: string;
 }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -191,7 +205,7 @@ export default function Canvas({
   // all just state.
   useEffect(() => {
     function applyFromPath() {
-      const match = window.location.pathname.match(/^\/(film|book)\/(.+)$/);
+      const match = window.location.pathname.slice(basePath.length).match(/^\/(film|book)\/(.+)$/);
       const mediaType = match?.[1] === "book" ? "book" : "movie";
       const idx = match
         ? entries.findIndex((e) => e.media_type === mediaType && slugify(e.title) === match[2])
@@ -253,7 +267,7 @@ export default function Canvas({
     zoomTargetRef.current = null;
     fromCameraRef.current = { x: pan.x, y: pan.y, scale: zoom };
     setSelectedIndex(i);
-    window.history.pushState({ selectedIndex: i }, "", detailPath(entry));
+    window.history.pushState({ selectedIndex: i }, "", basePath + detailPath(entry));
 
     const from: Transform = { x: pan.x, y: pan.y, scale: zoom };
     const to = computeZoomTransform(entry.x, entry.y, vw, vh, posterHeightFor(entry, bookHeights[entry.id]));
@@ -272,7 +286,7 @@ export default function Canvas({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const entry = entries[selectedIndex];
-    window.history.pushState(null, "", "/");
+    window.history.pushState(null, "", basePath || "/");
 
     const from = computeZoomTransform(entry.x, entry.y, vw, vh, posterHeightFor(entry, bookHeights[entry.id]));
     const to: Transform = { ...fromCameraRef.current };
@@ -299,7 +313,7 @@ export default function Canvas({
     const vh = window.innerHeight;
     const fromEntry = entries[selectedIndex];
     const toEntry = entries[newIndex];
-    window.history.replaceState({ selectedIndex: newIndex }, "", detailPath(toEntry));
+    window.history.replaceState({ selectedIndex: newIndex }, "", basePath + detailPath(toEntry));
 
     const from = computeZoomTransform(
       fromEntry.x,
@@ -538,11 +552,25 @@ export default function Canvas({
         onPointerDown={(e) => e.stopPropagation()}
       >
         <h1 className={styles.panelTitle}>{title}</h1>
-        <form action={changeUsernameAction}>
-          <button type="submit" className={styles.panelButton}>
-            change username
-          </button>
-        </form>
+        <div className={styles.panelActions}>
+          {changeUsernameAction ? (
+            <form action={changeUsernameAction}>
+              <button type="submit" className={styles.panelButton}>
+                change username
+              </button>
+            </form>
+          ) : (
+            <Link href="/" className={styles.panelButton}>
+              make your own
+            </Link>
+          )}
+          {shareAction && (
+            <ShareButton
+              action={shareAction}
+              className={`${styles.panelButton} ${styles.panelIconButton}`}
+            />
+          )}
+        </div>
       </div>
 
       {phase === "idle" && (

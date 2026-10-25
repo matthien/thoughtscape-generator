@@ -1,0 +1,53 @@
+.mat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 16px;
+  background-color: #19191b;
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* Same look as Canvas's corner panel. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(25, 25, 27, 0.4);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(150, 152, 158, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+}
+
+.message {
+  font-size: 14px;
+  letter-spacing: -0.28px;
+  color: #ffffff;
+  white-space: pre-line;
+}
+
+/* Same look as Canvas's .panelButton. */
+.button {
+  background: #2d2d2d;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: -0.24px;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  transition: background 120ms ease;
+}
+
+.button:hover {
+  background: #4d4d4d;
+}
+
+.button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}

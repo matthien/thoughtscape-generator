@@ -61,8 +61,18 @@
   color: #ffffff;
 }
 
-/* Same look as .resetButton. */
+.panelActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Same look as .resetButton. Also used on the shared view's
+   "make your own" link, hence the flex centering. */
 .panelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: #2d2d2d;
   color: #ffffff;
   border: none;
@@ -78,6 +88,16 @@
 
 .panelButton:hover {
   background: #4d4d4d;
+}
+
+.panelButton:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* The share button: a square around its 14px link icon. */
+.panelIconButton {
+  padding: 6px;
 }
 
 .resetButton {

@@ -1,0 +1,75 @@
+/* "link copied" toast (Share design, artboard C). Bottom center of the
+   viewport, below the reset-view button's spot. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #2d2d2d;
+  color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: -0.24px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: toast 3200ms ease both;
+}
+
+/* Rises 6px and fades in, holds, then fades out in place. */
+@keyframes toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  88% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+.check {
+  flex: none;
+  margin-top: 2px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.expiry {
+  color: #a5a5a5;
+}
+
+/* Screen-reader announcement of the toast. */
+.status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

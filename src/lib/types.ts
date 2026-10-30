@@ -16,6 +16,8 @@ export interface MediaEntry {
    *  shelf; null means it's on the mat. Never deleted, only toggled. */
   shelved_at: string | null;
   external_url: string | null;
+  /** Times the film was logged in the feed; always 1 for books. */
+  watch_count: number;
   x: number;
   y: number;
   mat_number: number;

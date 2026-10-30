@@ -91,6 +91,7 @@ export async function getFeedEntries({
       source: "goodreads",
       media_type: "book",
       director: null,
+      watch_count: 1,
       contains_spoilers: false,
       shelved_at: null,
       mat_number: 1,

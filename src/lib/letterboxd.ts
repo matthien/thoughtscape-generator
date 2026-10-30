@@ -11,6 +11,8 @@ export interface ParsedEntry {
   contains_spoilers: boolean;
   logged_at: string;
   external_url: string | null;
+  /** How many times this film was logged in the feed (rewatches fold into one entry). */
+  watch_count: number;
 }
 
 // Letterboxd's own boilerplate for a spoiler-flagged review, injected as the
@@ -91,7 +93,7 @@ export async function fetchLetterboxdEntries(username: string): Promise<ParsedEn
   let items = parsed?.rss?.channel?.item ?? [];
   if (!Array.isArray(items)) items = [items];
 
-  const entries: ParsedEntry[] = [];
+  const entries: { key: string; entry: ParsedEntry }[] = [];
   for (const item of items) {
     const guid = typeof item.guid === "object" ? item.guid["#text"] : item.guid;
     // The feed can also carry list activity; only film reviews have a filmTitle.
@@ -109,10 +111,17 @@ export async function fetchLetterboxdEntries(username: string): Promise<ParsedEn
       ? new Date(`${watched}T00:00:00Z`).toISOString()
       : new Date(item.pubDate).toISOString();
 
-    entries.push({
+    const title = String(item["letterboxd:filmTitle"]);
+    const year = item["letterboxd:filmYear"] ? Number(item["letterboxd:filmYear"]) : null;
+    // Every diary entry of a film shares its TMDB id, so that's what ties a
+    // rewatch to earlier watches. Title + year covers an item without one.
+    const tmdbId = item["tmdb:movieId"];
+    const key = tmdbId !== undefined && tmdbId !== "" ? `tmdb:${tmdbId}` : `${title}|${year}`;
+
+    entries.push({ key, entry: {
       source_id: String(guid),
-      title: String(item["letterboxd:filmTitle"]),
-      year: item["letterboxd:filmYear"] ? Number(item["letterboxd:filmYear"]) : null,
+      title,
+      year,
       cover_url: cover,
       rating:
         item["letterboxd:memberRating"] !== undefined
@@ -122,7 +131,36 @@ export async function fetchLetterboxdEntries(username: string): Promise<ParsedEn
       contains_spoilers: containsSpoilers,
       logged_at: loggedAt,
       external_url: item.link ? String(item.link) : null,
-    });
+      watch_count: 1,
+    } });
   }
-  return entries;
+  return mergeRewatches(entries);
+}
+
+// Folds every watch of the same film into one entry: the newest watch sets
+// the date and poster, and the count is how many times it appears in the
+// feed (only the last 50 logs, so not a lifetime total). A rewatch logged
+// with just stars would otherwise blank out an earlier review, so the review
+// and rating each come from the newest watch that actually has one.
+function mergeRewatches(items: { key: string; entry: ParsedEntry }[]): ParsedEntry[] {
+  const groups = new Map<string, ParsedEntry[]>();
+  for (const { key, entry } of items) {
+    const group = groups.get(key);
+    if (group) group.push(entry);
+    else groups.set(key, [entry]);
+  }
+
+  return [...groups.values()].map((group) => {
+    group.sort((a, b) => b.logged_at.localeCompare(a.logged_at));
+    const [newest] = group;
+    const reviewed = group.find((e) => e.review_text) ?? newest;
+    const rated = group.find((e) => e.rating !== null) ?? newest;
+    return {
+      ...newest,
+      review_text: reviewed.review_text,
+      contains_spoilers: reviewed.contains_spoilers,
+      rating: rated.rating,
+      watch_count: group.length,
+    };
+  });
 }
